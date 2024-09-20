@@ -7,6 +7,8 @@ function App() {
   const [district, setDistrict] = useState('');
   const [exciseStation, setExciseStation] = useState('');
   const [capturedImage, setCapturedImage] = useState(null);
+  const [devices, setDevices] = useState([]);
+  const [currentDeviceId, setCurrentDeviceId] = useState('');
   const webcamRef = useRef(null);
 
   useEffect(() => {
@@ -25,6 +27,18 @@ function App() {
     } else {
       console.error("Geolocation is not supported by this browser.");
     }
+  }, []);
+
+  useEffect(() => {
+    const getDevices = async () => {
+      const mediaDevices = await navigator.mediaDevices.enumerateDevices();
+      const videoDevices = mediaDevices.filter(device => device.kind === 'videoinput');
+      setDevices(videoDevices);
+      if (videoDevices.length > 0) {
+        setCurrentDeviceId(videoDevices[0].deviceId); // Default to the first camera
+      }
+    };
+    getDevices();
   }, []);
 
   const handleCapture = () => {
@@ -46,17 +60,15 @@ function App() {
       ctx.font = 'bold 20px Arial';
       ctx.textBaseline = 'top';
 
-      // Function to draw highlighted text
       const drawHighlightedText = (text, x, y) => {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';  // Semi-transparent black background
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
         const textWidth = ctx.measureText(text).width;
-        ctx.fillRect(x - 2, y - 2, textWidth + 4, 24);  // Background rectangle
+        ctx.fillRect(x - 2, y - 2, textWidth + 4, 24);
         
-        ctx.fillStyle = 'white';  // White text
+        ctx.fillStyle = 'white';
         ctx.fillText(text, x, y);
       };
 
-      // Draw the text with highlighting
       drawHighlightedText(`Lat: ${location.latitude.toFixed(6)}, Long: ${location.longitude.toFixed(6)}`, 10, canvas.height - 90);
       drawHighlightedText(`District: ${district}`, 10, canvas.height - 60);
       drawHighlightedText(`Excise Station: ${exciseStation}`, 10, canvas.height - 30);
@@ -81,6 +93,10 @@ function App() {
     }
   };
 
+  const handleChangeCamera = (event) => {
+    setCurrentDeviceId(event.target.value);
+  };
+
   return (
     <div className="App">
       <h1>Location Photo App</h1>
@@ -102,10 +118,20 @@ function App() {
         onChange={(e) => setExciseStation(e.target.value)}
       />
       <div className="camera-container">
+        <select onChange={handleChangeCamera} value={currentDeviceId}>
+          {devices.map(device => (
+            <option key={device.deviceId} value={device.deviceId}>
+              {device.label || `Camera ${devices.indexOf(device) + 1}`}
+            </option>
+          ))}
+        </select>
         <Webcam
           audio={false}
           ref={webcamRef}
           screenshotFormat="image/jpeg"
+          videoConstraints={{
+            deviceId: currentDeviceId ? { exact: currentDeviceId } : undefined,
+          }}
         />
       </div>
       <button onClick={handleCapture}>Capture</button>
