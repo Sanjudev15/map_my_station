@@ -1,0 +1,44 @@
+.App {
+  text-align: center;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+input {
+  margin: 10px;
+  padding: 5px;
+  width: 200px;
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+.camera-container {
+  margin: 20px auto;
+  max-width: 500px;
+}
+
+.camera-container video {
+  width: 100%;
+  height: auto;
+}
+
+.captured-image {
+  margin: 20px auto;
+  max-width: 500px;
+}
+
+.captured-image img {
+  width: 100%;
+  height: auto;
+}
